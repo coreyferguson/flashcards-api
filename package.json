@@ -4,12 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "deploy": "./node_modules/.bin/sls deploy"
+    "deploy": "./node_modules/.bin/sls deploy",
+    "test": "./node_modules/.bin/mocha test/spec/**/*.spec.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Corey Ferguson <corey.t.ferguson@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "local-dynamo-facade": "^1.0.1",
+    "mocha": "^6.1.4",
     "serverless": "^1.44.1"
   }
 }
