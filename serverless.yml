@@ -1,0 +1,40 @@
+
+service: flashcards-api # NOTE: update this with your service name
+frameworkVersion: "=1.44.1"
+
+provider:
+  name: aws
+  runtime: nodejs10.x
+  stage: dev
+  region: us-west-2
+
+functions:
+  authenticated:
+    handler: handler.authenticated
+    events:
+      - http:
+          path: /authenticated
+          method: GET
+          authorizer: aws_iam
+          cors: true
+
+  unauthenticated:
+    handler: handler.unauthenticated
+    events:
+      - http:
+          path: /unauthenticated
+          method: GET
+          cors: true
+
+resources:
+  Resources:
+    GatewayResponseDefault4XX:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          # Enable CORS for gateway errors
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: DEFAULT_4XX
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
