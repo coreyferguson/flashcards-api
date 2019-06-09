@@ -7,6 +7,18 @@ provider:
   runtime: nodejs10.x
   stage: dev
   region: us-west-2
+  environment:
+    cardsTableName: flashcards-api-cards-${self:custom.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-west-2:*:*"
 
 functions:
   authenticated:
@@ -28,6 +40,7 @@ functions:
 
 resources:
   Resources:
+
     GatewayResponseDefault4XX:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
@@ -38,3 +51,19 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
+
+    cardsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${provider:environment.cardsTableName}
+        AttributeDefinitions:
+          - AttributeName: deck
+            AttributeType: S
+        KeySchema:
+          - AttributeName: deck
+            KeyType: HASH
+          # - AttributeName: deckId
+          #   KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1

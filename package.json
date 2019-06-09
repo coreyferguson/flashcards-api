@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "deploy": "./node_modules/.bin/sls deploy",
-    "test": "./node_modules/.bin/mocha test/spec/**/*.spec.js"
+    "test": "./node_modules/.bin/mocha test/spec --recursive",
+    "watch": "./node_modules/.bin/mocha test/spec --recursive --watch"
   },
   "keywords": [],
   "author": "Corey Ferguson <corey.t.ferguson@gmail.com>",
