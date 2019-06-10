@@ -61,6 +61,8 @@ resources:
             AttributeType: S
           - AttributeName: id
             AttributeType: S
+          - AttributeName: frequencyAndLastTestTime
+            AttributeType: S
         KeySchema:
           - AttributeName: deck
             KeyType: HASH
@@ -69,3 +71,16 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: FrequencyIndex
+            KeySchema:
+              - AttributeName: deck
+                KeyType: HASH
+              - AttributeName: frequencyAndLastTestTime
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+

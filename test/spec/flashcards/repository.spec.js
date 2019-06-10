@@ -1,6 +1,7 @@
 
 const { expect, sinon } = require('../../core/test-utils');
 const CardsRepository = require('../../../src/cards/dao/repository').CardsRepository;
+const Frequencies = require('../../../src/cards/dao/Frequencies');
 const LocalDynamoFacade = require('local-dynamo-facade');
 const path = require('path');
 
@@ -86,6 +87,43 @@ describe('CardsRepository', () => {
       repository.delete(deck, 'id1'),
       repository.delete(deck, 'id2'),
       repository.delete(`${deck}2`, 'id1')
+    ]);
+  });
+
+  it('findByDeckOrderedByFrequencyAndLastTestTime', async () => {
+    const find = repository
+      .findByDeckOrderedByFrequencyAndLastTestTime
+      .bind(repository);
+    const deck = 'userId|deckId';
+    const save = async (deck, id, frequency, lastTestTime) => {
+      lastTestTime = lastTestTime || new Date().toISOString();
+      const frequencyIndex = Frequencies[frequency];
+      await repository.save({
+        deck: { S: deck },
+        id: { S: id },
+        frequencyAndLastTestTime: { S: `${frequencyIndex}|${lastTestTime}` },
+        frequency: { S: frequency },
+        frequencyIndex: { N: `${frequencyIndex}` },
+        lastTestTime: { S: lastTestTime }
+      });
+    };
+    await Promise.all([
+      save(deck, '1111', 'rarely'),
+      save(deck, '1112', 'sometimes'),
+      save(deck, '1113', 'often'),
+      save(deck, '1114', 'always', '2019-01-01T00:00:00.000Z'),
+      save(deck, '1115', 'always', '2019-01-02T00:00:00.000Z')
+    ]);
+    const cards = await find('userId', 'deckId');
+    expect(cards.Items.length).to.equal(5);
+    expect(cards.Items.map(item => item.id.S))
+      .to.eql([ '1114', '1115', '1113', '1112', '1111'])
+    await Promise.all([
+      repository.delete(deck, '1111'),
+      repository.delete(deck, '1112'),
+      repository.delete(deck, '1113'),
+      repository.delete(deck, '1114'),
+      repository.delete(deck, '1115')
     ]);
   });
 

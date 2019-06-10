@@ -30,6 +30,26 @@ class CardsRepository {
   }
 
   /**
+   * @param {string} deck `${userId}|${deckId}`
+   */
+  findByDeckOrderedByFrequencyAndLastTestTime(userId, deckId) {
+    console.info('CardsRepository.findByDeckOrderedByFrequencyAndLastTestTime(userId, deckId)', userId, deckId);
+    return new Promise((resolve, reject) => {
+      this._dynamodb.query({
+        TableName: this._tableName,
+        IndexName: 'FrequencyIndex',
+        KeyConditionExpression: 'deck = :deck',
+        ExpressionAttributeValues: {
+          ':deck': { S: `${userId}|${deckId}` }
+        }
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
+  /**
    * Create/update the given card.
    */
   save(card) {
