@@ -9,6 +9,7 @@ provider:
   region: us-west-2
   environment:
     cardsTableName: flashcards-api-cards-${self:custom.stage}
+    decksTableName: flashcards-api-decks-${self:custom.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -84,3 +85,20 @@ resources:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
 
+    decksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${provider:environment.decksTableName}
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+          - AttributeName: id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
