@@ -2,14 +2,20 @@
 service: flashcards-api # NOTE: update this with your service name
 frameworkVersion: "=1.44.1"
 
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  tableNames:
+    cards: flashcards-api-cards-${self:custom.stage}
+    decks: flashcards-api-decks-${self:custom.stage}
+
 provider:
   name: aws
   runtime: nodejs10.x
   stage: dev
   region: us-west-2
   environment:
-    cardsTableName: flashcards-api-cards-${self:custom.stage}
-    decksTableName: flashcards-api-decks-${self:custom.stage}
+    cardsTableName: ${self:custom.tableNames.cards}
+    decksTableName: ${self:custom.tableNames.decks}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -22,6 +28,18 @@ provider:
       Resource: "arn:aws:dynamodb:us-west-2:*:*"
 
 functions:
+  graphql:
+    handler: src/graphql/handler.graphqlHandler
+    events:
+    - http:
+        path: /graphql
+        method: POST
+        cors: true
+    - http:
+        path: /graphql
+        method: GET
+        cors: true
+
   authenticated:
     handler: handler.authenticated
     events:
@@ -56,7 +74,7 @@ resources:
     cardsTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${provider:environment.cardsTableName}
+        TableName: ${self:custom.tableNames.cards}
         AttributeDefinitions:
           - AttributeName: deck
             AttributeType: S
@@ -88,7 +106,7 @@ resources:
     decksTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: ${provider:environment.decksTableName}
+        TableName: ${self:custom.tableNames.decks}
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
