@@ -46,7 +46,7 @@ functions:
       - http:
           path: /authenticated
           method: GET
-          authorizer: aws_iam
+          # authorizer: aws_iam
           cors: true
 
   unauthenticated:
