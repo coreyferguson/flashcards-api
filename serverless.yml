@@ -1,11 +1,11 @@
 
-service: flashcards-api # NOTE: update this with your service name
+service: flash-api # NOTE: update this with your service name
 frameworkVersion: "=1.44.1"
 
 custom:
   tableNames:
-    cards: flashcards-api-cards-${self:provider.stage}
-    decks: flashcards-api-decks-${self:provider.stage}
+    cards: flash-api-cards-${self:provider.stage}
+    decks: flash-api-decks-${self:provider.stage}
 
 provider:
   name: aws

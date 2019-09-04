@@ -1,7 +1,7 @@
 
 process.env.stage = 'dev';
-process.env.cardsTableName = 'flashcards-api-cards-dev';
-process.env.decksTableName = 'flashcards-api-decks-dev';
+process.env.cardsTableName = 'flash-api-cards-dev';
+process.env.decksTableName = 'flash-api-decks-dev';
 
 const { ApolloServer, gql } = require('apollo-server');
 const createApolloServer = require('../../src/graphql/createApolloServer');
