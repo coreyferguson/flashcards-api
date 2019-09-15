@@ -42,25 +42,6 @@ functions:
         method: GET
         cors: true
 
-  authenticated:
-    handler: handler.authenticated
-    events:
-      - http:
-          path: /authenticated
-          method: GET
-          authorizer:
-            name: authorizer
-            arn: ${file(./serverless-${self:provider.stage}.yml):apiGatewayAuthorizerArn}
-          cors: true
-
-  unauthenticated:
-    handler: handler.unauthenticated
-    events:
-      - http:
-          path: /unauthenticated
-          method: GET
-          cors: true
-
 resources:
   Resources:
 
