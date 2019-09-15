@@ -33,6 +33,9 @@ functions:
     - http:
         path: /graphql
         method: POST
+        authorizer:
+          name: authorizer
+          arn: ${file(./serverless-${self:provider.stage}.yml):apiGatewayAuthorizerArn}
         cors: true
     - http:
         path: /graphql

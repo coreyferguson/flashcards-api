@@ -4,6 +4,6 @@ module.exports = `
     me: User
   }
   type User {
-    id: ID!
+    sub: ID!
   }
 `;

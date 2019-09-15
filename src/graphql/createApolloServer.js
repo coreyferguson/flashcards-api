@@ -6,6 +6,10 @@ module.exports = (ApolloServer, gql, context) => {
   const typeDefs = gql(typeDefsSource);
   return new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context: ({ event }) => {
+      const sub = event.requestContext.authorizer.claims.sub;
+      return { user: { sub } };
+    }
   });
 };
