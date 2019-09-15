@@ -12,11 +12,17 @@ npm test
 
 ## Deploy
 
+### First-time pre-deploy manual steps
+
+Copy and paste `./serverless-dev.yml` into a new configuration file for your stage. Replace relevant values.
+
+### Deploy and Redeploy
+
 ```bash
 npm run deploy
 ```
 
-Some manual steps have to be performed:
+### First-time post-deploy manual steps
 
 - API Gateway
     - Create Custom Domain Name
