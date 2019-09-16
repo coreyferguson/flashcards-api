@@ -5,7 +5,6 @@ frameworkVersion: "=1.44.1"
 custom:
   tableNames:
     cards: flash-api-cards-${self:provider.stage}
-    decks: flash-api-decks-${self:provider.stage}
 
 provider:
   name: aws
@@ -14,7 +13,6 @@ provider:
   region: us-west-2
   environment:
     cardsTableName: ${self:custom.tableNames.cards}
-    decksTableName: ${self:custom.tableNames.decks}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -49,7 +47,7 @@ resources:
       Type: 'AWS::ApiGateway::GatewayResponse'
       Properties:
         ResponseParameters:
-          # Enable CORS for gateway errors
+          # Enable CORS so errors in headers from API Gateway are available to client
           gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
           gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
         ResponseType: DEFAULT_4XX
@@ -61,14 +59,14 @@ resources:
       Properties:
         TableName: ${self:custom.tableNames.cards}
         AttributeDefinitions:
-          - AttributeName: deck
+          - AttributeName: userId
             AttributeType: S
           - AttributeName: id
             AttributeType: S
-          - AttributeName: frequencyAndLastTestTime
+          - AttributeName: deck
             AttributeType: S
         KeySchema:
-          - AttributeName: deck
+          - AttributeName: userId
             KeyType: HASH
           - AttributeName: id
             KeyType: RANGE
@@ -76,35 +74,17 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         GlobalSecondaryIndexes:
-          - IndexName: FrequencyIndex
+          - IndexName: DeckIndex
             KeySchema:
               - AttributeName: deck
                 KeyType: HASH
-              - AttributeName: frequencyAndLastTestTime
+              - AttributeName: id
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-
-    decksTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: ${self:custom.tableNames.decks}
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-          - AttributeName: id
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-          - AttributeName: id
-            KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
 
     LambdaPermission:
       Type: AWS::Lambda::Permission

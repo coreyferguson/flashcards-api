@@ -7,6 +7,7 @@
 git clone git@github.com:coreyferguson/flash-api.git
 cd flash-api
 npm install
+sudo apt install openjdk-8-jdk
 npm test
 ```
 

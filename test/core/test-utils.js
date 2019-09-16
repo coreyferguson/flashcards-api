@@ -4,5 +4,8 @@ const assert = chai.assert;    // Using Assert style
 const expect = chai.expect;    // Using Expect style
 const should = chai.should();  // Using Should style
 const sinon = require('sinon');
+const sinonChai = require('sinon-chai');
+
+chai.use(sinonChai);
 
 module.exports = { assert, expect, should, sinon };

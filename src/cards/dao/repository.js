@@ -1,6 +1,7 @@
 
 const AWS = require('aws-sdk');
 AWS.config.update({ region: 'us-west-2' });
+const { logger } = require('logger-for-kibana');
 
 class CardsRepository {
 
@@ -8,16 +9,35 @@ class CardsRepository {
     options = options || {};
     this._dynamodb = options.dynamodb || new AWS.DynamoDB();
     this._tableName = options.tableName || process.env.cardsTableName;
+    this._logger = options.logger || logger;
   }
 
-  /**
-   * @param {string} deck `${userId}|${deckId}`
-   */
-  find(deck) {
-    console.info('CardsRepository.find(deck)', deck);
+  async findByUserId(userId, options) {
+    this._logger.info('CardsRepository.findOne', { userId });
+    let { pageSize, after } = options || {};
+    pageSize = pageSize || 100;
     return new Promise((resolve, reject) => {
       this._dynamodb.query({
         TableName: this._tableName,
+        KeyConditionExpression: 'userId = :userId',
+        ExpressionAttributeValues: {
+          ':userId': { S: userId }
+        },
+        Limit: pageSize,
+        ExclusiveStartKey: after
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
+  async findByDeck(deck) {
+    this._logger.info('CardsRepository.findByDeck', { deck });
+    return new Promise((resolve, reject) => {
+      this._dynamodb.query({
+        TableName: this._tableName,
+        IndexName: 'DeckIndex',
         KeyConditionExpression: 'deck = :deck',
         ExpressionAttributeValues: {
           ':deck': { S: deck }
@@ -29,56 +49,13 @@ class CardsRepository {
     });
   }
 
-  /**
-   * @param {string} deck `${userId}|${deckId}`
-   */
-  findByDeckOrderedByFrequencyAndLastTestTime(userId, deckId) {
-    console.info('CardsRepository.findByDeckOrderedByFrequencyAndLastTestTime(userId, deckId)', userId, deckId);
-    return new Promise((resolve, reject) => {
-      this._dynamodb.query({
-        TableName: this._tableName,
-        IndexName: 'FrequencyIndex',
-        KeyConditionExpression: 'deck = :deck',
-        ExpressionAttributeValues: {
-          ':deck': { S: `${userId}|${deckId}` }
-        }
-      }, (err, data) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    });
-  }
-
-  /**
-   * Create/update the given card.
-   */
-  save(card) {
-    console.info('CardsRepository.save({ deck, id })', card.deck, card.id);
+  async save(card) {
+    this._logger.info('CardsRepository.save', { cardId: card.id });
     return new Promise((resolve, reject) => {
       this._dynamodb.putItem({
         TableName: this._tableName,
         Item: card,
         ReturnConsumedCapacity: 'TOTAL'
-      }, (err, data) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    });
-  }
-
-  /**
-   * @param {string} deck `${userId}|${deckId}`
-   * @param {string} id card id
-   */
-  delete(deck, id) {
-    console.info('CardsRepository.delete({ deck, id })', deck, id);
-    return new Promise((resolve, reject) => {
-      this._dynamodb.deleteItem({
-        TableName: this._tableName,
-        Key: {
-          deck: { S: deck },
-          id: { S: id }
-        }
       }, (err, data) => {
         if (err) reject(err);
         else resolve(data);
