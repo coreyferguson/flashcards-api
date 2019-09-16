@@ -12,6 +12,27 @@ class CardsRepository {
     this._logger = options.logger || logger;
   }
 
+  async findByDeck(deck, options) {
+    this._logger.info('CardsRepository.findByDeck', { deck });
+    let { pageSize, after } = options || {};
+    pageSize = pageSize || 100;
+    return new Promise((resolve, reject) => {
+      this._dynamodb.query({
+        TableName: this._tableName,
+        IndexName: 'DeckIndex',
+        KeyConditionExpression: 'deck = :deck',
+        ExpressionAttributeValues: {
+          ':deck': { S: deck }
+        },
+        Limit: pageSize,
+        ExclusiveStartKey: after
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
   async findByUserId(userId, options) {
     this._logger.info('CardsRepository.findOne', { userId });
     let { pageSize, after } = options || {};
@@ -32,25 +53,8 @@ class CardsRepository {
     });
   }
 
-  async findByDeck(deck) {
-    this._logger.info('CardsRepository.findByDeck', { deck });
-    return new Promise((resolve, reject) => {
-      this._dynamodb.query({
-        TableName: this._tableName,
-        IndexName: 'DeckIndex',
-        KeyConditionExpression: 'deck = :deck',
-        ExpressionAttributeValues: {
-          ':deck': { S: deck }
-        }
-      }, (err, data) => {
-        if (err) reject(err);
-        else resolve(data);
-      });
-    });
-  }
-
   async save(card) {
-    this._logger.info('CardsRepository.save', { cardId: card.id });
+    this._logger.info('CardsRepository.save', { cardId: card.id.S });
     return new Promise((resolve, reject) => {
       this._dynamodb.putItem({
         TableName: this._tableName,
