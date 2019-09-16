@@ -1,6 +1,8 @@
 
 const typeDefsSource = require('./typeDefs');
 const resolvers = require('./resolvers');
+const logger = require('logger-for-kibana');
+const uuidv4 = require('uuid/v4');
 
 module.exports = (ApolloServer, gql, context) => {
   const typeDefs = gql(typeDefsSource);
@@ -8,8 +10,11 @@ module.exports = (ApolloServer, gql, context) => {
     typeDefs,
     resolvers,
     context: ({ event }) => {
+      logger.tid(uuidv4());
       const sub = event.requestContext.authorizer.claims.sub;
-      return { user: { sub } };
+      const result = { user: { sub } }
+      logger.info('setting context for user', result);
+      return result;
     }
   });
 };
