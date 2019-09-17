@@ -33,9 +33,26 @@ class CardsRepository {
     });
   }
 
+  async findOne(userId, id) {
+    this._logger.info('CardsRepository.findOne', { userId, id });
+    return new Promise((resolve, reject) => {
+      this._dynamodb.getItem({
+        TableName: this._tableName,
+        Key: {
+          userId: { S: userId },
+          id: { S: id }
+        }
+      }, (err, data) => {
+        this._logger.info('CardsRepository.findOne:results', { err, data });
+        if (err) reject(err);
+        else resolve(data['Item']);
+      });
+    });
+  }
+
   async findByUserId(userId, options) {
-    this._logger.info('CardsRepository.findOne', { userId });
-    let { pageSize, after } = options || {};
+    this._logger.info('CardsRepository.findByUserId', { userId });
+    let { pageSize, next } = options || {};
     pageSize = pageSize || 100;
     return new Promise((resolve, reject) => {
       this._dynamodb.query({
@@ -45,7 +62,7 @@ class CardsRepository {
           ':userId': { S: userId }
         },
         Limit: pageSize,
-        ExclusiveStartKey: after
+        ExclusiveStartKey: next
       }, (err, data) => {
         if (err) reject(err);
         else resolve(data);

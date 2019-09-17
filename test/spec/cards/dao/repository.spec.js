@@ -110,4 +110,11 @@ describe('CardsRepository integration test', () => {
     expect(res3.Items.length).to.equal(0);
   });
 
+  it('findOne', async () => {
+    const userId = 'user_id_2';
+    const id = 'card_id_2';
+    const entity = await repository.findOne(userId, id);
+    expect(entity.text.S).to.equal('text_value_2a');
+  });
+
 });
