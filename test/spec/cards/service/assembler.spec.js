@@ -81,7 +81,7 @@ describe('CardsServiceAssembler', () => {
         "id":{"S":"card_id_2"}
       }
     };
-    const models = assembler.toModels(entities);
+    const models = assembler.toModels(entities, toCursor => toCursor);
     expect(models.items.length).to.equal(2);
     expect(models.items[0].text).to.equal('text_value_1');
     expect(models.items[1].text).to.equal('text_value_2');

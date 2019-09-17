@@ -28,11 +28,11 @@ class CardsServiceAssembler {
     return model;
   }
 
-  toModels(entities) {
+  toModels(entities, toCursor) {
     this._logger.info('CardsServiceAssembler.toModels');
     const models = {};
     models.items = entities.Items.map(this.toModel.bind(this));
-    if (entities.LastEvaluatedKey) models.next = JSON.stringify(entities.LastEvaluatedKey);
+    if (entities.LastEvaluatedKey) models.next = toCursor(entities.LastEvaluatedKey);
     return models;
   }
 

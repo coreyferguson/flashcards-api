@@ -79,9 +79,9 @@ describe('CardsRepository integration test', () => {
     const userId = 'user_id_1';
     const res1 = await repository.findByUserId(userId, { pageSize: 1 });
     expect(res1.Items[0].id.S).to.equal('card_id_1');
-    const res2 = await repository.findByUserId(userId, { pageSize: 1, after: res1.LastEvaluatedKey });
+    const res2 = await repository.findByUserId(userId, { pageSize: 1, next: res1.LastEvaluatedKey });
     expect(res2.Items[0].id.S).to.equal('card_id_2');
-    const res3 = await repository.findByUserId(userId, { pageSize: 1, after: res2.LastEvaluatedKey });
+    const res3 = await repository.findByUserId(userId, { pageSize: 1, next: res2.LastEvaluatedKey });
     expect(res3.LastEvaluatedKey).to.be.undefined;
     expect(res3.Items.length).to.equal(0);
   });

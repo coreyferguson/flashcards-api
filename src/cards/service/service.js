@@ -3,6 +3,7 @@ const repository = require('../dao/repository');
 const assembler = require('./assembler');
 const { logger } = require('logger-for-kibana');
 const uuid = require('uuid/v4');
+const { toCursor, fromCursor } = require('./defaultIndexCursorAssembler');
 
 class CardsService {
 
@@ -28,9 +29,9 @@ class CardsService {
     return this._assembler.toModel(updatedEntity);
   }
 
-  async findByDeck(deck) {
+  async findByDeck(deck, options) {
     this._logger.info('CardsService.findByDeck', { deck });
-    const entities = await this._repository.findByDeck(deck);
+    const entities = await this._repository.findByDeck(deck, options);
     const models = this._assembler.toModels(entities);
     return models;
   }
@@ -44,9 +45,9 @@ class CardsService {
 
   async findByUserId(userId, options) {
     this._logger.info('CardsService.findByUserId', { userId });
-    if (options.next) options.next = JSON.parse(options.next);
+    if (options.next) options.next = fromCursor(userId, options.next);
     const entities = await this._repository.findByUserId(userId, options);
-    const models = this._assembler.toModels(entities);
+    const models = this._assembler.toModels(entities, toCursor);
     return models;
   }
 
