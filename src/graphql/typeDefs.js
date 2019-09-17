@@ -16,7 +16,10 @@ module.exports = `
       "When id is undefined a new card will be created."
       id: String,
       deck: String,
-      text: String
+      sideAText: String
+      sideAImageUrl: String
+      sideBText: String
+      sideBImageUrl: String
     ): Card
 
   }
@@ -34,7 +37,10 @@ module.exports = `
     id: ID!
     user: User
     deck: String
-    text: String
+    sideAText: String
+    sideAImageUrl: String
+    sideBText: String
+    sideBImageUrl: String
   }
 
   type CardCollection {

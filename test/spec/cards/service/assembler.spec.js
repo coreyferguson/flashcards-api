@@ -24,12 +24,18 @@ describe('CardsServiceAssembler', () => {
       userId: 'userIdValue',
       id: 'cardIdValue',
       deck: 'deckValue',
-      text: 'textValue'
+      sideAText: 'sideATextValue',
+      sideAImageUrl: 'sideAImageUrlValue',
+      sideBText: 'sideBTextValue',
+      sideBImageUrl: 'sideBImageUrlValue'
     });
     expect(entity.id).to.eql({ S: 'cardIdValue' });
     expect(entity.userId).to.eql({ S: 'userIdValue' });
     expect(entity.deck).to.eql({ S: 'deckValue' });
-    expect(entity.text).to.eql({ S: 'textValue' });
+    expect(entity.sideAText).to.eql({ S: 'sideATextValue' });
+    expect(entity.sideAImageUrl).to.eql({ S: 'sideAImageUrlValue' });
+    expect(entity.sideBText).to.eql({ S: 'sideBTextValue' });
+    expect(entity.sideBImageUrl).to.eql({ S: 'sideBImageUrlValue' });
   });
 
   it('expect toModel to be logged', () => {
@@ -49,12 +55,18 @@ describe('CardsServiceAssembler', () => {
       userId: { S: 'userIdValue' },
       id: { S: 'idValue' },
       deck: { S: 'deckValue' },
-      text: { S: 'textValue' }
+      sideAText: { S: 'sideATextValue' },
+      sideAImageUrl: { S: 'sideAImageUrlValue' },
+      sideBText: { S: 'sideBTextValue' },
+      sideBImageUrl: { S: 'sideBImageUrlValue' }
     });
     expect(model.userId).to.equal('userIdValue');
     expect(model.id).to.equal('idValue');
     expect(model.deck).to.equal('deckValue');
-    expect(model.text).to.equal('textValue');
+    expect(model.sideAText).to.equal('sideATextValue');
+    expect(model.sideAImageUrl).to.equal('sideAImageUrlValue');
+    expect(model.sideBText).to.equal('sideBTextValue');
+    expect(model.sideBImageUrl).to.equal('sideBImageUrlValue');
   });
 
   it('toModels translated all properties with next cursor', () => {
@@ -65,13 +77,13 @@ describe('CardsServiceAssembler', () => {
           "userId":{"S":"user_id_1"},
           "id":{"S":"card_id_1"},
           "deck":{"S":"deck_1"},
-          "text":{"S":"text_value_1"}
+          "sideAText":{"S":"sideAText_value_1"}
         },
         {
           "userId":{"S":"user_id_1"},
           "id":{"S":"card_id_2"},
           "deck":{"S":"deck_1"},
-          "text":{"S":"text_value_2"}
+          "sideAText":{"S":"sideAText_value_2"}
         }
       ],
       "Count":1,
@@ -83,8 +95,8 @@ describe('CardsServiceAssembler', () => {
     };
     const models = assembler.toModels(entities, toCursor => toCursor);
     expect(models.items.length).to.equal(2);
-    expect(models.items[0].text).to.equal('text_value_1');
-    expect(models.items[1].text).to.equal('text_value_2');
+    expect(models.items[0].sideAText).to.equal('sideAText_value_1');
+    expect(models.items[1].sideAText).to.equal('sideAText_value_2');
     expect(models.next).to.not.be.undefined;
   });
 
@@ -96,13 +108,13 @@ describe('CardsServiceAssembler', () => {
           "userId":{"S":"user_id_1"},
           "id":{"S":"card_id_1"},
           "deck":{"S":"deck_1"},
-          "text":{"S":"text_value_1"}
+          "sideAText":{"S":"sideAText_value_1"}
         },
         {
           "userId":{"S":"user_id_1"},
           "id":{"S":"card_id_2"},
           "deck":{"S":"deck_1"},
-          "text":{"S":"text_value_2"}
+          "sideAText":{"S":"sideAText_value_2"}
         }
       ],
       "Count":1,
@@ -110,8 +122,8 @@ describe('CardsServiceAssembler', () => {
     };
     const models = assembler.toModels(entities);
     expect(models.items.length).to.equal(2);
-    expect(models.items[0].text).to.equal('text_value_1');
-    expect(models.items[1].text).to.equal('text_value_2');
+    expect(models.items[0].sideAText).to.equal('sideAText_value_1');
+    expect(models.items[1].sideAText).to.equal('sideAText_value_2');
   });
 
 });
