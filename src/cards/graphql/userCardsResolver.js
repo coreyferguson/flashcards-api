@@ -1,8 +1,17 @@
 
 const { logger } = require('logger-for-kibana');
 const service = require('../service');
+const uuid = require('uuid/v4');
 
 module.exports = async (parent, args, context, info) => {
-  const userId = parent.sub;
-  return service.findByUserId(userId, args);
+  const timer = logger.startTimer('userCardsResolver', uuid());
+  try {
+    const userId = parent.sub;
+    const card = service.findByUserId(userId, args);
+    timer.stop(true);
+    return card;
+  } catch (err) {
+    timer.stop(false);
+    throw err;
+  }
 };
