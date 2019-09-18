@@ -15,7 +15,7 @@ module.exports = `
       userId: String!,
       "When id is undefined a new card will be created."
       id: String,
-      deck: String,
+      labels: [String],
       sideAText: String
       sideAImageUrl: String
       sideBText: String
@@ -36,7 +36,7 @@ module.exports = `
   type Card {
     id: ID!
     user: User
-    deck: String
+    labels: [String]
     sideAText: String
     sideAImageUrl: String
     sideBText: String

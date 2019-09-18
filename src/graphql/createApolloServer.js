@@ -11,7 +11,7 @@ module.exports = (ApolloServer, gql, context) => {
       logger.tid(uuidv4());
       const sub = event.requestContext.authorizer.claims.sub;
       const result = { user: { sub } }
-      logger.info('setting context for user', result);
+      logger.info('CreateApolloServer, setting context for user', result);
       return result;
     };
   }

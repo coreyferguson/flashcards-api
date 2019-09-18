@@ -53,32 +53,44 @@ resources:
         ResponseType: DEFAULT_4XX
         RestApiId:
           Ref: 'ApiGatewayRestApi'
-
     cardsTable:
       Type: AWS::DynamoDB::Table
       Properties:
         TableName: ${self:custom.tableNames.cards}
         AttributeDefinitions:
-          - AttributeName: userId
+          - AttributeName: vertex # userId|cardId
             AttributeType: S
-          - AttributeName: id
+          - AttributeName: edge   # card/label edge
             AttributeType: S
-          - AttributeName: deck
+          - AttributeName: UserIdIndex_userId
+            AttributeType: S
+          - AttributeName: UserIdIndex_id
             AttributeType: S
         KeySchema:
-          - AttributeName: userId
+          - AttributeName: vertex
             KeyType: HASH
-          - AttributeName: id
+          - AttributeName: edge
             KeyType: RANGE
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         GlobalSecondaryIndexes:
-          - IndexName: DeckIndex
+          - IndexName: LabelIndex
             KeySchema:
-              - AttributeName: deck
+              - AttributeName: edge
                 KeyType: HASH
-              - AttributeName: id
+              - AttributeName: vertex
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: UserIdIndex_userId
+                KeyType: HASH
+              - AttributeName: UserIdIndex_id
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

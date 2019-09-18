@@ -7,8 +7,8 @@
     "deploy": "./node_modules/.bin/sls deploy",
     "remove": "./node_modules/.bin/sls remove",
     "start": "node test/local/graphql.js",
-    "test": "./node_modules/.bin/mocha test/spec --recursive",
-    "test:watch": "./node_modules/.bin/mocha test/spec --recursive --watch"
+    "test": "./node_modules/.bin/mocha src/**/*.spec.js test/**/*.spec.js --recursive",
+    "test:watch": "./node_modules/.bin/mocha src/**/*.spec.js test/**/*.spec.js --recursive --watch"
   },
   "keywords": [],
   "author": "Corey Ferguson <corey.t.ferguson@gmail.com>",
