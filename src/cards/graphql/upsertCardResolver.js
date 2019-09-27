@@ -7,8 +7,10 @@ module.exports = async (parent, args, context, info) => {
   const timer = logger.startTimer('upsertCardResolver', uuid());
   try {
     const card = await service.save(args);
-    for (let label of args.labels) {
-      await service.attachLabel(card.userId, card.id, label);
+    if (args.labels) {
+      for (let label of args.labels) {
+        await service.attachLabel(card.userId, card.id, label);
+      }
     }
     timer.stop(true);
     return card;
