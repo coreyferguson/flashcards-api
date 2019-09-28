@@ -82,7 +82,8 @@ class CardsRepository {
           ':userId': { S: userId }
         },
         Limit: pageSize,
-        ExclusiveStartKey: next
+        ExclusiveStartKey: next,
+        ScanIndexForward: false
       }, (err, data) => {
         if (err) reject(err);
         else resolve(data);
