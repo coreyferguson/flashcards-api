@@ -22,6 +22,11 @@ module.exports = `
       sideBImageUrl: String
     ): Card
 
+    deleteCard(
+      userId: String!
+      id: String!
+    ): Card
+
   }
 
   "You know, a user... like... you."
