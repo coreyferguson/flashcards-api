@@ -1,7 +1,8 @@
 
-const usersResolver = require('../users/graphql/usersResolver');
-const userCardsResolver = require('../cards/graphql/userCardsResolver');
 const upsertCardResolver = require('../cards/graphql/upsertCardResolver');
+const userCardResolver = require('../cards/graphql/userCardResolver');
+const userCardsResolver = require('../cards/graphql/userCardsResolver');
+const usersResolver = require('../users/graphql/usersResolver');
 
 module.exports = {
   Query: {
@@ -11,6 +12,7 @@ module.exports = {
     upsertCard: upsertCardResolver
   },
   User: {
+    card: userCardResolver,
     cards: userCardsResolver
   }
 };

@@ -28,6 +28,8 @@ module.exports = `
   type User {
     "Primary key for a user. This is the sub defined by OpenID provider."
     sub: ID!
+    "Fetch a single card for the given user."
+    card(id: String!): Card
     "Collection of cards belonging to this user"
     cards(pageSize: Int, next: String): CardCollection!
   }
