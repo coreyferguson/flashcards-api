@@ -16,7 +16,7 @@
   "devDependencies": {
     "apollo-server": "^2.6.2",
     "chai": "^4.2.0",
-    "local-dynamo-facade": "^1.0.2",
+    "local-dynamo-facade": "^1.0.4",
     "mocha": "^6.1.4",
     "serverless": "^1.44.1",
     "sinon": "^7.3.2",
@@ -25,7 +25,8 @@
   "dependencies": {
     "apollo-server-lambda": "^2.6.2",
     "graphql": "^14.3.1",
-    "logger-for-kibana": "^1.0.0",
+    "logger-for-kibana": "^1.0.2",
+    "moment": "^2.24.0",
     "uuid": "^3.3.3"
   }
 }

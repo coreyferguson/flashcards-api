@@ -6,6 +6,7 @@ const labelAssembler = require('./labelAssembler');
 const repository = require('../dao/cardsRepository');
 const uuid = require('uuid/v4');
 const { logger } = require('logger-for-kibana');
+const moment = require('moment');
 
 class CardsService {
 
@@ -23,7 +24,7 @@ class CardsService {
     if (model.id) {
       this._logger.info('CardsService.save:update', { cardId: model.id });
     } else {
-      const cardId = uuid();
+      const cardId = this.createId();
       this._logger.info('CardsService.save:create', { cardId });
       model.id = cardId;
     }
@@ -89,6 +90,12 @@ class CardsService {
     collection.items = await Promise.all(promises);
     collection.next = this._findByUserIdCursorAssembler.toCursor(cards);
     return collection;
+  }
+
+  createId() {
+    const now = moment().format('YYYYMMDDHHmmss');
+    const id = now + '-' + uuid();
+    return id;
   }
 
 }

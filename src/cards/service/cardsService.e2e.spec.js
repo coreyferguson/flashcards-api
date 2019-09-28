@@ -36,15 +36,14 @@ describe('CardsService', () => {
   it('save - new card with all properties', async () => {
     const card = await service.save({
       userId: 'userIdValue',
-      id: 'cardIdValue',
       sideAText: 'sideATextValue',
       sideAImageUrl: 'sideAImageUrlValue',
       sideBText: 'sideBTextValue',
       sideBImageUrl: 'sideBImageUrlValue'
     });
     expect(card.id).to.not.be.undefined;
+    expect(card.id).to.match(/\d{14}-.*/, 'id prepended with date');
     expect(card.userId).to.equal('userIdValue');
-    expect(card.id).to.equal('cardIdValue');
     expect(card.sideAText).to.equal('sideATextValue');
     expect(card.sideAImageUrl).to.equal('sideAImageUrlValue');
     expect(card.sideBText).to.equal('sideBTextValue');
