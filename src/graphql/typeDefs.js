@@ -12,10 +12,10 @@ module.exports = `
 
     "Create or update an existing card. Leave the id undefined to create a new card."
     upsertCard(
-      userId: String!,
+      userId: String!
       "When id is undefined a new card will be created."
-      id: String,
-      labels: [String],
+      id: String
+      labels: [String]
       sideAText: String
       sideAImageUrl: String
       sideBText: String
@@ -27,16 +27,28 @@ module.exports = `
       id: String!
     ): Card
 
+    newPracticeSession(userId: String!): Boolean
+
   }
 
   "You know, a user... like... you."
   type User {
+
     "Primary key for a user. This is the sub defined by OpenID provider."
     sub: ID!
+
     "Fetch a single card for the given user."
     card(id: String!): Card
+
     "Collection of cards belonging to this user"
-    cards(pageSize: Int, next: String): CardCollection!
+    cards(
+      pageSize: Int
+      next: String
+      label: String
+      "Can be 'lastTestTime' or 'creationTime'."
+      orderBy: String
+    ): CardCollection!
+
   }
 
   "A Card. Represents a unit of knowledge a user maintains."

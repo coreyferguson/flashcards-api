@@ -7,7 +7,7 @@ module.exports = async (parent, args, context, info) => {
   const timer = logger.startTimer('userCardResolver', uuid());
   try {
     const userId = parent.sub;
-    const card = service.findOne(userId, args.id);
+    const card = await service.findOne(userId, args.id);
     timer.stop(true);
     return card;
   } catch (err) {

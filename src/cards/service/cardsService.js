@@ -51,6 +51,13 @@ class CardsService {
     await this._repository.deleteLabelBatch(keys);
   }
 
+  async deleteLabelsOnCard(userId, id) {
+    const card = await this.findOne(userId, id);
+    const keys = card.labels.map(label => ({ userId, id, label }));
+    if (keys.length === 0) return;
+    await this._repository.deleteLabelBatch(keys);
+  }
+
   async detachLabel(userId, id, label) {
     this._logger.info('CardsService.detachLabel', { userId, id, label });
     await this._repository.deleteEdgeByLabel(userId, id, label);
@@ -139,16 +146,39 @@ class CardsService {
       this._logger.info('CardsService.save:create', { cardId });
       model.id = cardId;
     }
-    const entity = this._findByCardIdModelAssembler.toEntity(model);
+    let entity = this._findByCardIdModelAssembler.toEntity(model);
     await this._repository.saveEdge(entity);
-    const updatedEntity = await this._repository.findByCardId(model.userId, model.id);
-    return this._findByCardIdModelAssembler.toModel(updatedEntity);
+    let card = await this.findOne(model.userId, model.id);
+    if (!this._arraysAreEqual(card.labels, model.labels)) {
+      model.labels = model.labels || [];
+      await this.deleteLabelsOnCard(model.userId, model.id);
+      const keys = model.labels.map(label => ({
+        vertex: { S: `card:${model.userId}|${model.id}` },
+        edge: { S: `label:${label}` },
+        LabelAndTestTimeIndex_userId_lastTestTime_id: entity.LabelAndTestTimeIndex_userId_lastTestTime_id
+      }));
+      await this._repository.saveEdgeBatch(keys);
+      card = this.findOne(model.userId, model.id);
+    }
+    return card;
   }
 
   createId() {
     const now = moment().format('YYYYMMDDHHmmss');
     const id = now + '-' + uuid();
     return id;
+  }
+
+  _arraysAreEqual(arr1, arr2) {
+    if (!arr1 && !arr2) return true;
+    if (!arr1 || !arr2) return false;
+    let s1 = new Set();
+    for (let item of arr1) s1.add(item);
+    for (let item of arr2) {
+      if (!s1.has(item)) return false;
+      s1.delete(item);
+    }
+    return arr2.size === 0;
   }
 
 }

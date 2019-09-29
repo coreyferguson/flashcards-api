@@ -64,6 +64,19 @@ describe('CardsService', () => {
     await service.delete('userIdValue', 'cardIdValue');
   });
 
+  it('save - overwrite existing labels', async () => {
+    // set up
+    await service.save({ userId: 'user1', id: 'card1', labels: ['label1', 'label2'] });
+    let card = await service.findOne('user1', 'card1');
+    expect(card.labels).to.eql([ 'label1', 'label2' ]);
+    // execute function being tested
+    card.labels = [ 'label2', 'label3' ];
+    await service.save(card);
+    // validate
+    card = await service.findOne('user1', 'card1');
+    expect(card.labels).to.eql([ 'label2', 'label3' ]);
+  });
+
   it('delete - deletes vertex and all edges', async () => {
     const card = await service.save({ userId: 'userIdValue', id: 'cardIdValue' });
     await service.attachLabel('userIdValue', 'cardIdValue', 'labelValue1');
@@ -376,6 +389,8 @@ describe('CardsService', () => {
     ]);
   });
 
+  it('deleteLabel - pagination');
+
   it('deleteLabel - no cards with given label', async () => {
     await service.save({ userId: 'userIdValue1', id: 'cardIdValue1' });
     await Promise.all([
@@ -386,6 +401,27 @@ describe('CardsService', () => {
     let cards = await service.findByUserId('userIdValue1');
     expect(cards.items[0].id).to.equal('cardIdValue1');
     expect(cards.items[0].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
+  });
+
+  it('deleteLabelsOnCard', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' })
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1')
+    ]);
+    // execute function being tested
+    await service.deleteLabelsOnCard('userIdValue1', 'cardIdValue1');
+    // verify
+    const cards = await service.findByUserId('userIdValue1');
+    expect(cards.items[0].id).to.equal('cardIdValue2');
+    expect(cards.items[0].labels).to.eql([ 'labelValue1' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue1');
+    expect(cards.items[1].labels).to.eql([]);
   });
 
 });

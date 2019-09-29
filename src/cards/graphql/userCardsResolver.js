@@ -7,9 +7,14 @@ module.exports = async (parent, args, context, info) => {
   const timer = logger.startTimer('userCardsResolver', uuid());
   try {
     const userId = parent.sub;
-    const card = service.findByUserId(userId, args);
+    let cards;
+    if (!args.label) {
+      cards = await service.findByUserId(userId, args);
+    } else if (args.label && (!args.orderBy || args.orderBy === 'lastTestTime')) {
+      cards = await service.findByLabelOrderByLastTestTime(userId, args.label);
+    }
     timer.stop(true);
-    return card;
+    return cards;
   } catch (err) {
     timer.stop(false);
     throw err;

@@ -55,7 +55,7 @@ class CardsRepository {
   }
 
   async findByCardId(userId, id) {
-    this._logger.info('CardsRepository.findOne', { userId, id });
+    this._logger.info('CardsRepository.findByCardId', { userId, id });
     const vertex = `card:${userId}|${id}`;
     const pageSize = 20;
     return new Promise((resolve, reject) => {
@@ -173,6 +173,7 @@ class CardsRepository {
 
   async saveEdgeBatch(keys) {
     this._logger.info('CardsRepository.saveEdgeBatch');
+    if (!keys || keys.length === 0) return;
     return new Promise((resolve, reject) => {
       this._dynamodb.batchWriteItem({
         RequestItems: {
