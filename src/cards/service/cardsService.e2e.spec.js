@@ -228,4 +228,164 @@ describe('CardsService', () => {
     await service.delete('userIdValue2', 'cardIdValue4');
   });
 
+  it('newPracticeSession - filled with frequency-often', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue4' })
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-often'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-often'),
+      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes'),
+      service.attachLabel('userIdValue1', 'cardIdValue4', 'frequency-sometimes')
+    ]);
+    // execute function being tested
+    const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
+    // validate
+    expect(cards.items.length).to.equal(2);
+    expect(cards.items[0].id).to.equal('cardIdValue1');
+    expect(cards.items[0].labels).to.eql([ 'frequency-often', 'practice' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue2');
+    expect(cards.items[1].labels).to.eql([ 'frequency-often', 'practice' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2'),
+      service.delete('userIdValue1', 'cardIdValue3'),
+      service.delete('userIdValue1', 'cardIdValue4')
+    ]);
+  });
+
+  it('newPracticeSession - 1 frequency-often and 1 frequency-sometimes', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-often'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-sometimes'),
+      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes')
+    ]);
+    // execute function being tested
+    const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
+    // validate
+    expect(cards.items.length).to.equal(2);
+    expect(cards.items[0].id).to.equal('cardIdValue1');
+    expect(cards.items[0].labels).to.eql([ 'frequency-often', 'practice' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue2');
+    expect(cards.items[1].labels).to.eql([ 'frequency-sometimes', 'practice' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2'),
+      service.delete('userIdValue1', 'cardIdValue3')
+    ]);
+  });
+
+  it('newPracticeSession - filled with frequency-sometimes', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-sometimes'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-sometimes'),
+      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes')
+    ]);
+    // execute function being tested
+    const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
+    // validate
+    expect(cards.items.length).to.equal(2);
+    expect(cards.items[0].id).to.equal('cardIdValue1');
+    expect(cards.items[0].labels).to.eql([ 'frequency-sometimes', 'practice' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue2');
+    expect(cards.items[1].labels).to.eql([ 'frequency-sometimes', 'practice' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2'),
+      service.delete('userIdValue1', 'cardIdValue3')
+    ]);
+  });
+
+  it('detachLabel', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' })
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue2')
+    ]);
+    // execute function being tested
+    await service.detachLabel('userIdValue1', 'cardIdValue1', 'labelValue1');
+    const cards = await service.findByUserId('userIdValue1');
+    // validate
+    expect(cards.items[0].id).to.equal('cardIdValue2');
+    expect(cards.items[0].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue1');
+    expect(cards.items[1].labels).to.eql([ 'labelValue2' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2')
+    ]);
+  });
+
+  it('deleteLabel', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
+      service.save({ userId: 'userIdValue2', id: 'cardIdValue3' })
+    ]);
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue2'),
+      service.attachLabel('userIdValue2', 'cardIdValue3', 'labelValue1'),
+      service.attachLabel('userIdValue2', 'cardIdValue3', 'labelValue2')
+    ]);
+    // execute function being tested
+    await service.deleteLabel('userIdValue1', 'labelValue1');
+    // validate
+    let cards = await service.findByUserId('userIdValue1');
+    expect(cards.items[0].id).to.equal('cardIdValue2');
+    expect(cards.items[0].labels).to.eql([ 'labelValue2' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue1');
+    expect(cards.items[1].labels).to.eql([ 'labelValue2' ]);
+    cards = await service.findByUserId('userIdValue2');
+    expect(cards.items[0].id).to.equal('cardIdValue3');
+    expect(cards.items[0].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2'),
+      service.delete('userIdValue1', 'cardIdValue3')
+    ]);
+  });
+
+  it('deleteLabel - no cards with given label', async () => {
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1' });
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
+    ]);
+    await service.deleteLabel('userIdValue1', 'labelValue3');
+    let cards = await service.findByUserId('userIdValue1');
+    expect(cards.items[0].id).to.equal('cardIdValue1');
+    expect(cards.items[0].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
+  });
+
 });

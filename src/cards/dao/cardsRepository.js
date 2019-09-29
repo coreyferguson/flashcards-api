@@ -27,6 +27,33 @@ class CardsRepository {
     });
   }
 
+  async deleteEdgeByLabel(userId, id, label) {
+    const vertex = `card:${userId}|${id}`
+    const edge =`label:${label}`;
+    return this.deleteEdge(vertex, edge);
+  }
+
+  async deleteLabelBatch(keys) {
+    this._logger.info('CardsRepository.deleteLabelBatch');
+    return new Promise((resolve, reject) => {
+      this._dynamodb.batchWriteItem({
+        RequestItems: {
+          [this._tableName]: keys.map(key => ({
+            DeleteRequest: {
+              Key: {
+                vertex: { S: `card:${key.userId}|${key.id}` },
+                edge: { S: `label:${key.label}` }
+              }
+            }
+          }))
+        }
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
   async findByCardId(userId, id) {
     this._logger.info('CardsRepository.findOne', { userId, id });
     const vertex = `card:${userId}|${id}`;
@@ -137,6 +164,28 @@ class CardsRepository {
         TableName: this._tableName,
         Item: card,
         ReturnConsumedCapacity: 'TOTAL'
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
+  async saveEdgeBatch(keys) {
+    this._logger.info('CardsRepository.saveEdgeBatch');
+    return new Promise((resolve, reject) => {
+      this._dynamodb.batchWriteItem({
+        RequestItems: {
+          [this._tableName]: keys.map(key => ({
+            PutRequest: {
+              Item: {
+                vertex: key.vertex,
+                edge: key.edge,
+                LabelAndTestTimeIndex_userId_lastTestTime_id: key.LabelAndTestTimeIndex_userId_lastTestTime_id
+              }
+            }
+          }))
+        }
       }, (err, data) => {
         if (err) reject(err);
         else resolve(data);
