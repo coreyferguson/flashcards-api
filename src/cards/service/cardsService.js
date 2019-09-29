@@ -50,7 +50,14 @@ class CardsService {
 
   async attachLabel(userId, id, label) {
     this._logger.info('CardsService.attachLabel', { userId, id, label });
-    const model = { userId, id, label };
+    const card = await this.findOne(userId, id);
+    const model = {
+      userId,
+      id,
+      label,
+      lastTestTime: card.lastTestTime ? card.lastTestTime : undefined,
+      LabelAndTestTimeIndex_userId_lastTestTime_id: card.LabelAndTestTimeIndex_userId_lastTestTime_id
+    };
     const entity = this._labelAssembler.toEntity(model, label);
     await this._repository.saveEdge(entity);
     const updatedEntity = await this._repository.findByCardId(model.userId, model.id);
@@ -63,6 +70,23 @@ class CardsService {
     options = options || {};
     options.next = this._findByLabelCursorAssembler.fromCursor(options.next, userId, label);
     const cards = await this._repository.findByLabel(userId, label, options);
+    const promises = cards.Items.map(async item => {
+      const id = item.vertex.S.replace('card:', '').split('|')[1];
+      const entity = await this._repository.findByCardId(userId, id);
+      const model = await this._findByCardIdModelAssembler.toModel(entity);
+      return model;
+    });
+    const collection = {};
+    collection.items = await Promise.all(promises);
+    collection.next = this._findByLabelCursorAssembler.toCursor(cards);
+    return collection;
+  }
+
+  async findByLabelOrderByLastTestTime(userId, label, options) {
+    this._logger.info('CardsService.findByLabelOrderByLastTestTime', { userId, label });
+    options = options || {};
+    options.next = this._findByLabelCursorAssembler.fromCursor(options.next, userId, label);
+    const cards = await this._repository.findByLabelOrderByLastTestTime(userId, label, options);
     const promises = cards.Items.map(async item => {
       const id = item.vertex.S.replace('card:', '').split('|')[1];
       const entity = await this._repository.findByCardId(userId, id);

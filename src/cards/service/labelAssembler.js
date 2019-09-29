@@ -13,10 +13,8 @@ class LabelAssembler {
     const entity = {};
     entity.vertex = { S: `card:${model.userId}|${model.id}` };
     entity.edge = { S: `label:${label}` };
-    if (model.sideAText) entity.sideAText = { S: model.sideAText };
-    if (model.sideAImageUrl) entity.sideAImageUrl = { S: model.sideAImageUrl };
-    if (model.sideBText) entity.sideBText = { S: model.sideBText };
-    if (model.sideBImageUrl) entity.sideBImageUrl = { S: model.sideBImageUrl };
+    if (model.lastTestTime) entity.lastTestTime = { S: model.lastTestTime };
+    entity.LabelAndTestTimeIndex_userId_lastTestTime_id = { S: model.LabelAndTestTimeIndex_userId_lastTestTime_id };
     return entity;
   }
 

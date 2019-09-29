@@ -1,6 +1,8 @@
 
 const { logger } = require('logger-for-kibana');
 
+const SMALLEST_DATE = '1900-01-01T00:00:00.000Z';
+
 class FindByCardIdModelAssembler {
 
   constructor(options) {
@@ -10,6 +12,7 @@ class FindByCardIdModelAssembler {
 
   toEntity(model) {
     this._logger.info('FindByCardIdModelAssembler.toEntity', { modelId: model.id });
+    model.lastTestTime = model.lastTestTime || SMALLEST_DATE;
     const entity = {};
     entity.vertex = { S: `card:${model.userId}|${model.id}` };
     entity.edge = { S: `card:${model.userId}|${model.id}` };
@@ -19,6 +22,16 @@ class FindByCardIdModelAssembler {
     if (model.sideAImageUrl) entity.sideAImageUrl = { S: model.sideAImageUrl };
     if (model.sideBText) entity.sideBText = { S: model.sideBText };
     if (model.sideBImageUrl) entity.sideBImageUrl = { S: model.sideBImageUrl };
+
+    // LabelAndLastTestTimeIndex
+    if (!model.lastTestTime) {
+      entity.LabelAndTestTimeIndex_userId_lastTestTime_id = { S: `${model.userId}|${SMALLEST_DATE}|${model.id}` };
+    } else {
+      entity.lastTestTime = { S: model.lastTestTime };
+      entity.LabelAndTestTimeIndex_userId_lastTestTime_id =
+        { S: `${model.userId}|${model.lastTestTime}|${model.id}` };
+    }
+
     return entity;
   }
 
@@ -41,6 +54,11 @@ class FindByCardIdModelAssembler {
       } else {
         model.labels.push(item.edge.S.replace('label:', ''));
       }
+
+      // LabelAndLastTestTimeIndex
+      if (item.lastTestTime && item.lastTestTime.S !== SMALLEST_DATE) model.lastTestTime = item.lastTestTime.S;
+      if (item.LabelAndTestTimeIndex_userId_lastTestTime_id)
+        model.LabelAndTestTimeIndex_userId_lastTestTime_id = item.LabelAndTestTimeIndex_userId_lastTestTime_id.S;
     }
     return model;
   }

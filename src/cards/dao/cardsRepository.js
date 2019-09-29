@@ -69,6 +69,29 @@ class CardsRepository {
     });
   }
 
+  async findByLabelOrderByLastTestTime(userId, label, options) {
+    this._logger.info('CardsRepository.findByLabelOrderByLastTestTime', { userId, label });
+    const edge = `label:${label}`;
+    let { pageSize, next } = options || {};
+    pageSize = pageSize || 100;
+    return new Promise((resolve, reject) => {
+      this._dynamodb.query({
+        TableName: this._tableName,
+        IndexName: 'LabelAndLastTestTimeIndex',
+        KeyConditionExpression: 'edge = :edge',
+        ExpressionAttributeValues: {
+          ':edge': { S: edge }
+        },
+        Limit: pageSize,
+        ExclusiveStartKey: next,
+        ScanIndexForward: true
+      }, (err, data) => {
+        if (err) reject(err);
+        else resolve(data);
+      });
+    });
+  }
+
   async findByUserId(userId, options) {
     this._logger.info('CardsRepository.findByUserId', { userId });
     let { pageSize, next } = options || {};

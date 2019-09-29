@@ -89,11 +89,13 @@ describe('CardsService', () => {
     expect(cards).to.eql({
       next: undefined,
       items: [{
+        "LabelAndTestTimeIndex_userId_lastTestTime_id": "userIdValue1|1900-01-01T00:00:00.000Z|cardIdValue1",
         userId: 'userIdValue1',
         id: 'cardIdValue1',
         sideAText: 'side A text value 1',
         labels: ['labelValue1', 'labelValue2']
       }, {
+        "LabelAndTestTimeIndex_userId_lastTestTime_id": "userIdValue1|1900-01-01T00:00:00.000Z|cardIdValue2",
         userId: 'userIdValue1',
         id: 'cardIdValue2',
         sideAText: 'side A text value 2',
@@ -107,10 +109,10 @@ describe('CardsService', () => {
   });
 
   it('findByLabel - pagination', async () => {
-    const create = id => Promise.all([
-      service.save({ userId: 'userIdValue1', id: `cardIdValue${id}`, sideAText: `side A text value ${id}` }),
-      service.attachLabel('userIdValue1', `cardIdValue${id}`, 'labelValue1')
-    ]);
+    const create = async id => {
+      await service.save({ userId: 'userIdValue1', id: `cardIdValue${id}`, sideAText: `side A text value ${id}` });
+      await service.attachLabel('userIdValue1', `cardIdValue${id}`, 'labelValue1');
+    };
     const remove = id => service.delete('userIdValue1', `cardIdValue${id}`);
     await Promise.all([ create(1), create(2), create(3), create(4) ]);
     let cards = await service.findByLabel('userIdValue1', 'labelValue1', { pageSize: 2 });
@@ -128,19 +130,21 @@ describe('CardsService', () => {
   it('findByUserId - find collection of cards for given user id', async () => {
     // set up user cards
     await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', sideAText: 'side A text value 1' });
-    await service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1');
-    await service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2');
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
+    ]);
     await service.save({ userId: 'userIdValue1', id: 'cardIdValue2', sideAText: 'side A text value 2' });
     // set up other user's cards
     await service.save({ userId: 'userIdValueA', id: 'cardIdValueA', sideAText: 'side A text value A' });
     await service.save({ userId: 'userIdValueB', id: 'cardIdValueB', sideAText: 'side A text value B' });
     // fetch cards
     const cards = await service.findByUserId('userIdValue1');
-    // validate
+    // validate - order is important
     expect(cards.items.length).to.equal(2);
-    expect(cards.items[0].id).to.equal('cardIdValue1');
-    expect(cards.items[0].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
-    expect(cards.items[1].id).to.equal('cardIdValue2');
+    expect(cards.items[0].id).to.equal('cardIdValue2');
+    expect(cards.items[1].id).to.equal('cardIdValue1');
+    expect(cards.items[1].labels).to.eql([ 'labelValue1', 'labelValue2' ]);
     // clean up
     await service.delete('userIdValue1', 'cardIdValue1');
     await service.delete('userIdValue1', 'cardIdValue2');
@@ -149,10 +153,10 @@ describe('CardsService', () => {
   });
 
   it('findByUserId - pagination', async () => {
-    const create = id => Promise.all([
-      service.save({ userId: 'userIdValue1', id: `cardIdValue${id}`, sideAText: `side A text value ${id}` }),
-      service.attachLabel('userIdValue1', `cardIdValue${id}`, 'labelValue1')
-    ]);
+    const create = async id => {
+      await service.save({ userId: 'userIdValue1', id: `cardIdValue${id}`, sideAText: `side A text value ${id}` });
+      await service.attachLabel('userIdValue1', `cardIdValue${id}`, 'labelValue1');
+    };
     const remove = id => service.delete('userIdValue1', `cardIdValue${id}`);
     await Promise.all([ create(1), create(2), create(3), create(4) ]);
     let cards = await service.findByUserId('userIdValue1', { pageSize: 2 });
@@ -168,12 +172,12 @@ describe('CardsService', () => {
   });
 
   it('findOne - find a single card and its labels', async () => {
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1' });
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
       service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' })
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
     ]);
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue2' });
     const card = await service.findOne('userIdValue1', 'cardIdValue1');
     expect(card.userId).to.equal('userIdValue1');
     expect(card.id).to.equal('cardIdValue1');
@@ -182,6 +186,46 @@ describe('CardsService', () => {
       service.delete('userIdValue1', 'cardIdValue1'),
       service.delete('userIdValue1', 'cardIdValue2')
     ]);
+  });
+
+  it('findByLabelOrderByLastTestTime - ordered by last test time', async () => {
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', lastTestTime: '2019-01-01T00:00:00.001Z' });
+    await Promise.all([
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
+      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
+    ]);
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue2' });
+    await service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1');
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue3', lastTestTime: '2019-01-01T00:00:00.002Z' });
+    await service.attachLabel('userIdValue1', 'cardIdValue3', 'labelValue1');
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue4', lastTestTime: '2019-01-01T00:00:00.003Z' });
+    await service.attachLabel('userIdValue1', 'cardIdValue4', 'labelValue2');
+    const cards = await service.findByLabelOrderByLastTestTime('userIdValue1', 'labelValue1');
+    expect(cards).to.eql({
+      "items": [{
+        "LabelAndTestTimeIndex_userId_lastTestTime_id": "userIdValue1|1900-01-01T00:00:00.000Z|cardIdValue2",
+        "id": "cardIdValue2",
+        "labels": [ "labelValue1" ],
+        "userId": "userIdValue1"
+      }, {
+        "LabelAndTestTimeIndex_userId_lastTestTime_id": "userIdValue1|2019-01-01T00:00:00.001Z|cardIdValue1",
+        "id": "cardIdValue1",
+        "labels": [ "labelValue1", "labelValue2" ],
+        "lastTestTime": "2019-01-01T00:00:00.001Z",
+        "userId": "userIdValue1"
+      }, {
+        "LabelAndTestTimeIndex_userId_lastTestTime_id": "userIdValue1|2019-01-01T00:00:00.002Z|cardIdValue3",
+        "id": "cardIdValue3",
+        "labels": [ "labelValue1" ],
+        "lastTestTime": "2019-01-01T00:00:00.002Z",
+        "userId": "userIdValue1"
+      }],
+      next: undefined
+    });
+    await service.delete('userIdValue1', 'cardIdValue1');
+    await service.delete('userIdValue1', 'cardIdValue2');
+    await service.delete('userIdValue1', 'cardIdValue3');
+    await service.delete('userIdValue2', 'cardIdValue4');
   });
 
 });

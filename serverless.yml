@@ -58,13 +58,15 @@ resources:
       Properties:
         TableName: ${self:custom.tableNames.cards}
         AttributeDefinitions:
-          - AttributeName: vertex # userId|cardId
+          - AttributeName: vertex # card:{userId}|{cardId}
             AttributeType: S
-          - AttributeName: edge   # card/label edge
+          - AttributeName: edge   # card:* OR label:{label}
             AttributeType: S
           - AttributeName: UserIdIndex_userId
             AttributeType: S
           - AttributeName: UserIdIndex_id
+            AttributeType: S
+          - AttributeName: LabelAndTestTimeIndex_userId_lastTestTime_id
             AttributeType: S
         KeySchema:
           - AttributeName: vertex
@@ -91,6 +93,17 @@ resources:
               - AttributeName: UserIdIndex_userId
                 KeyType: HASH
               - AttributeName: UserIdIndex_id
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          - IndexName: LabelAndLastTestTimeIndex
+            KeySchema:
+              - AttributeName: edge
+                KeyType: HASH
+              - AttributeName: LabelAndTestTimeIndex_userId_lastTestTime_id
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
