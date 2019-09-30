@@ -27,7 +27,10 @@ module.exports = `
       id: String!
     ): Card
 
-    newPracticeSession(userId: String!): Boolean
+    newPracticeDeck(
+      userId: String!
+      pageSize: Int
+    ): Boolean
 
   }
 
