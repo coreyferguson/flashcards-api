@@ -35,30 +35,32 @@ describe('CardsService', () => {
 
   it('save - new card with all properties', async () => {
     const card = await service.save({
-      userId: 'userIdValue',
-      sideAText: 'sideATextValue',
-      sideAImageUrl: 'sideAImageUrlValue',
-      sideBText: 'sideBTextValue',
-      sideBImageUrl: 'sideBImageUrlValue'
+      userId: 'user1',
+      sideAText: 'side 1 text',
+      sideAImageUrl: 'side 1 image',
+      sideBText: 'side 2 text',
+      sideBImageUrl: 'side 2 image',
+      lastTestTime: '2019-01-01T00:00:00.000Z'
     });
     expect(card.id).to.not.be.undefined;
     expect(card.id).to.match(/\d{14}-.*/, 'id prepended with date');
-    expect(card.userId).to.equal('userIdValue');
-    expect(card.sideAText).to.equal('sideATextValue');
-    expect(card.sideAImageUrl).to.equal('sideAImageUrlValue');
-    expect(card.sideBText).to.equal('sideBTextValue');
-    expect(card.sideBImageUrl).to.equal('sideBImageUrlValue');
-    await service.delete('userIdValue', 'cardIdValue');
+    expect(card.userId).to.equal('user1');
+    expect(card.sideAText).to.equal('side 1 text');
+    expect(card.sideAImageUrl).to.equal('side 1 image');
+    expect(card.sideBText).to.equal('side 2 text');
+    expect(card.sideBImageUrl).to.equal('side 2 image');
+    expect(card.lastTestTime).to.equal('2019-01-01T00:00:00.000Z');
+    await service.delete('user1', card.id);
   });
 
   it('save - attach a few labels to a card', async () => {
     const card = await service.save({
       userId: 'userIdValue',
       id: 'cardIdValue',
-      sideAText: 'sideATextValue'
+      sideAText: 'sideATextValue',
+      labels: ['labelValue1']
     });
-    let res = await service.attachLabel('userIdValue', 'cardIdValue', 'labelValue1');
-    expect(res.labels).to.eql([ 'labelValue1' ]);
+    expect(card.labels).to.eql([ 'labelValue1' ]);
     res = await service.attachLabel('userIdValue', 'cardIdValue', 'labelValue2');
     expect(res.labels).to.eql([ 'labelValue1', 'labelValue2' ]);
     await service.delete('userIdValue', 'cardIdValue');
@@ -77,10 +79,16 @@ describe('CardsService', () => {
     expect(card.labels).to.eql([ 'label2', 'label3' ]);
   });
 
+  it('save - ignore labels that are empty string');
+
+  it('save - new cards add frequency-often label', async () => {
+    const card = await service.save({ userId: 'user1' });
+    expect(card.labels).to.contain('frequency-often');
+    await service.delete('user1', card.id);
+  });
+
   it('delete - deletes vertex and all edges', async () => {
-    const card = await service.save({ userId: 'userIdValue', id: 'cardIdValue' });
-    await service.attachLabel('userIdValue', 'cardIdValue', 'labelValue1');
-    await service.attachLabel('userIdValue', 'cardIdValue', 'labelValue2');
+    const card = await service.save({ userId: 'userIdValue', id: 'cardIdValue', labels: ['labelValue1', 'labelValue2'] });
     await service.delete('userIdValue', 'cardIdValue');
     const edge1 = await repository.getEdge('card:userIdValue|cardIdValue', 'label:labelValue1');
     expect(edge1.Item).to.be.undefined;
@@ -185,11 +193,7 @@ describe('CardsService', () => {
   });
 
   it('findOne - find a single card and its labels', async () => {
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1' });
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
-    ]);
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] });
     await service.save({ userId: 'userIdValue1', id: 'cardIdValue2' });
     const card = await service.findOne('userIdValue1', 'cardIdValue1');
     expect(card.userId).to.equal('userIdValue1');
@@ -202,17 +206,25 @@ describe('CardsService', () => {
   });
 
   it('findByLabelOrderByLastTestTime - ordered by last test time', async () => {
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', lastTestTime: '2019-01-01T00:00:00.001Z' });
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
-    ]);
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue2' });
-    await service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1');
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue3', lastTestTime: '2019-01-01T00:00:00.002Z' });
-    await service.attachLabel('userIdValue1', 'cardIdValue3', 'labelValue1');
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue4', lastTestTime: '2019-01-01T00:00:00.003Z' });
-    await service.attachLabel('userIdValue1', 'cardIdValue4', 'labelValue2');
+    await service.save({
+      userId: 'userIdValue1',
+      id: 'cardIdValue1',
+      lastTestTime: '2019-01-01T00:00:00.001Z',
+      labels: ['labelValue1', 'labelValue2']
+    });
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['labelValue1'] });
+    await service.save({
+      userId: 'userIdValue1',
+      id: 'cardIdValue3',
+      lastTestTime: '2019-01-01T00:00:00.002Z',
+      labels: ['labelValue1']
+    });
+    await service.save({
+      userId: 'userIdValue1',
+      id: 'cardIdValue4',
+      lastTestTime: '2019-01-01T00:00:00.003Z',
+      labels: ['labelValue2']
+    });
     const cards = await service.findByLabelOrderByLastTestTime('userIdValue1', 'labelValue1');
     expect(cards).to.eql({
       "items": [{
@@ -244,16 +256,10 @@ describe('CardsService', () => {
   it('newPracticeSession - filled with frequency-often', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue4' })
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-often'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-often'),
-      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes'),
-      service.attachLabel('userIdValue1', 'cardIdValue4', 'frequency-sometimes')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['frequency-often'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['frequency-often'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3', labels: ['frequency-sometimes'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue4', labels: ['frequency-sometimes'] })
     ]);
     // execute function being tested
     const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
@@ -275,14 +281,9 @@ describe('CardsService', () => {
   it('newPracticeSession - 1 frequency-often and 1 frequency-sometimes', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-often'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-sometimes'),
-      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['frequency-often'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['frequency-sometimes'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3', labels: ['frequency-sometimes'] }),
     ]);
     // execute function being tested
     const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
@@ -303,14 +304,9 @@ describe('CardsService', () => {
   it('newPracticeSession - filled with frequency-sometimes', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue3' }),
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'frequency-sometimes'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'frequency-sometimes'),
-      service.attachLabel('userIdValue1', 'cardIdValue3', 'frequency-sometimes')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['frequency-sometimes'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['frequency-sometimes'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3', labels: ['frequency-sometimes'] }),
     ]);
     // execute function being tested
     const cards = await service.newPracticeSession('userIdValue1', { pageSize: 2 });
@@ -331,14 +327,8 @@ describe('CardsService', () => {
   it('detachLabel', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' })
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue2')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['labelValue1', 'labelValue2'] })
     ]);
     // execute function being tested
     await service.detachLabel('userIdValue1', 'cardIdValue1', 'labelValue1');
@@ -358,17 +348,9 @@ describe('CardsService', () => {
   it('deleteLabel', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' }),
-      service.save({ userId: 'userIdValue2', id: 'cardIdValue3' })
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue2'),
-      service.attachLabel('userIdValue2', 'cardIdValue3', 'labelValue1'),
-      service.attachLabel('userIdValue2', 'cardIdValue3', 'labelValue2')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['labelValue1', 'labelValue2'] }),
+      service.save({ userId: 'userIdValue2', id: 'cardIdValue3', labels: ['labelValue1', 'labelValue2'] })
     ]);
     // execute function being tested
     await service.deleteLabel('userIdValue1', 'labelValue1');
@@ -392,11 +374,7 @@ describe('CardsService', () => {
   it('deleteLabel - pagination');
 
   it('deleteLabel - no cards with given label', async () => {
-    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1' });
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2')
-    ]);
+    await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] });
     await service.deleteLabel('userIdValue1', 'labelValue3');
     let cards = await service.findByUserId('userIdValue1');
     expect(cards.items[0].id).to.equal('cardIdValue1');
@@ -406,13 +384,8 @@ describe('CardsService', () => {
   it('deleteLabelsOnCard', async () => {
     // set up
     await Promise.all([
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue1' }),
-      service.save({ userId: 'userIdValue1', id: 'cardIdValue2' })
-    ]);
-    await Promise.all([
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue1'),
-      service.attachLabel('userIdValue1', 'cardIdValue1', 'labelValue2'),
-      service.attachLabel('userIdValue1', 'cardIdValue2', 'labelValue1')
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['labelValue1'] })
     ]);
     // execute function being tested
     await service.deleteLabelsOnCard('userIdValue1', 'cardIdValue1');

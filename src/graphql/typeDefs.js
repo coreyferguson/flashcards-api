@@ -20,6 +20,7 @@ module.exports = `
       sideAImageUrl: String
       sideBText: String
       sideBImageUrl: String
+      lastTestTime: String
     ): Card
 
     deleteCard(
@@ -63,6 +64,7 @@ module.exports = `
     sideAImageUrl: String
     sideBText: String
     sideBImageUrl: String
+    lastTestTime: String
   }
 
   type CardCollection {

@@ -145,6 +145,8 @@ class CardsService {
       const cardId = this.createId();
       this._logger.info('CardsService.save:create', { cardId });
       model.id = cardId;
+      model.labels = model.labels || [];
+      model.labels.push('frequency-often');
     }
     let entity = this._findByCardIdModelAssembler.toEntity(model);
     await this._repository.saveEdge(entity);
