@@ -8,6 +8,8 @@ const uuid = require('uuid/v4');
 const { logger } = require('logger-for-kibana');
 const moment = require('moment');
 
+const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 class CardsService {
 
   constructor(options) {
@@ -135,6 +137,7 @@ class CardsService {
       LabelAndTestTimeIndex_userId_lastTestTime_id: card.LabelAndTestTimeIndex_userId_lastTestTime_id
     }));
     await this._repository.saveEdgeBatch(keys);
+    await timeout(50); // give a little buffer for secondary indexes to be updated
     return this.findByLabelOrderByLastTestTime(userId, 'practice');
   }
 

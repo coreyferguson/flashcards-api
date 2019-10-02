@@ -6,9 +6,9 @@ const { logger } = require('logger-for-kibana');
 module.exports = async (parent, args, context, info) => {
   const timer = logger.startTimer('newPracticeDeckResolver', uuid());
   try {
-    await service.newPracticeSession(args.userId, { pageSize: args.pageSize });
+    const cards = await service.newPracticeSession(args.userId, { pageSize: args.pageSize });
     timer.stop(true);
-    return true;
+    return cards;
   } catch (err) {
     timer.stop(false);
     throw err;

@@ -31,7 +31,7 @@ module.exports = `
     newPracticeDeck(
       userId: String!
       pageSize: Int
-    ): Boolean
+    ): CardCollection!
 
   }
 

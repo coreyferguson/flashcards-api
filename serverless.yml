@@ -74,9 +74,7 @@ resources:
             KeyType: HASH
           - AttributeName: edge
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
           - IndexName: LabelIndex
             KeySchema:
@@ -86,9 +84,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
           - IndexName: UserIdIndex
             KeySchema:
               - AttributeName: UserIdIndex_userId
@@ -97,9 +92,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
           - IndexName: LabelAndLastTestTimeIndex
             KeySchema:
               - AttributeName: edge
@@ -108,9 +100,6 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
 
     LambdaPermission:
       Type: AWS::Lambda::Permission

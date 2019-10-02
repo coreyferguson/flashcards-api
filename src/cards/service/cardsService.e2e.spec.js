@@ -87,6 +87,8 @@ describe('CardsService', () => {
     await service.delete('user1', card.id);
   });
 
+  it('save - new cards with frequency-often included as part of request');
+
   it('delete - deletes vertex and all edges', async () => {
     const card = await service.save({ userId: 'userIdValue', id: 'cardIdValue', labels: ['labelValue1', 'labelValue2'] });
     await service.delete('userIdValue', 'cardIdValue');
