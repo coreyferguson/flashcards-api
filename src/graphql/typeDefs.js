@@ -18,8 +18,10 @@ module.exports = `
       labels: [String]
       sideAText: String
       sideAImageUrl: String
+      sideAFontSize: Int
       sideBText: String
       sideBImageUrl: String
+      sideBFontSize: Int
       lastTestTime: String
     ): Card
 
@@ -62,10 +64,12 @@ module.exports = `
     labels: [String]
     sideAText: String
     sideAImageUrl: String
+    sideAFontSize: Int
     sideBText: String
     sideBImageUrl: String
+    sideBFontSize: Int
     lastTestTime: String
-  }
+}
 
   type CardCollection {
     next: String

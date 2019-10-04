@@ -22,6 +22,8 @@ class FindByCardIdModelAssembler {
     if (model.sideAImageUrl) entity.sideAImageUrl = { S: model.sideAImageUrl };
     if (model.sideBText) entity.sideBText = { S: model.sideBText };
     if (model.sideBImageUrl) entity.sideBImageUrl = { S: model.sideBImageUrl };
+    if (model.sideAFontSize) entity.sideAFontSize = { N: `${model.sideAFontSize}` };
+    if (model.sideBFontSize) entity.sideBFontSize = { N: `${model.sideBFontSize}` };
 
     // LabelAndLastTestTimeIndex
     if (!model.lastTestTime) {
@@ -51,6 +53,8 @@ class FindByCardIdModelAssembler {
         if (item.sideAImageUrl) model.sideAImageUrl = item.sideAImageUrl.S;
         if (item.sideBText) model.sideBText = item.sideBText.S;
         if (item.sideBImageUrl) model.sideBImageUrl = item.sideBImageUrl.S;
+        if (item.sideAFontSize) model.sideAFontSize = item.sideAFontSize.N;
+        if (item.sideBFontSize) model.sideBFontSize = item.sideBFontSize.N;
       } else {
         model.labels.push(item.edge.S.replace('label:', ''));
       }
