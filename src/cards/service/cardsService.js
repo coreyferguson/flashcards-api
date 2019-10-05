@@ -150,6 +150,7 @@ class CardsService {
       model.id = cardId;
       model.labels = model.labels || [];
       model.labels.push('frequency-often');
+      model.lastTestTime =  model.lastTestTime || new Date().toISOString();
     }
     let entity = this._findByCardIdModelAssembler.toEntity(model);
     await this._repository.saveEdge(entity);
