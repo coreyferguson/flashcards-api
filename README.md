@@ -28,10 +28,10 @@ npm run deploy
 - API Gateway
     - Create Custom Domain Name
         - HTTP Protocol
-        - Domain Name: flash-api-{stage}.overattribution.com
+        - Domain Name: flash-api-{stage}.growme.fyi
         - TLS 1.2
         - Edge optimized
-        - Certificate: *.overattribution.com
+        - Certificate: *.growme.fyi
     - Add Base Path Mapping
         - Path: /
         - API: {stage}-flash-api
