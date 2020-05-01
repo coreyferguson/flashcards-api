@@ -16,7 +16,7 @@
   "devDependencies": {
     "apollo-server": "^2.6.2",
     "chai": "^4.2.0",
-    "local-dynamo-facade": "^1.0.4",
+    "local-dynamo-facade": "^1.0.5",
     "mocha": "^6.1.4",
     "serverless": "^1.44.1",
     "sinon": "^7.3.2",
