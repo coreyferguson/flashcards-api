@@ -399,4 +399,26 @@ describe('CardsService', () => {
     expect(cards.items[1].labels).to.eql([]);
   });
 
+  it('new practice deck contains only user1 cards', async () => {
+    await service.save({ userId: 'user1', sideAText: 'card 1 side A text', sideBText: 'card 1 side B text' });
+    await service.save({ userId: 'user1', sideAText: 'card 2 side A text', sideBText: 'card 2 side B text' });
+    await service.save({ userId: 'user2', sideAText: 'card 1 side A text', sideBText: 'card 1 side B text' });
+    await service.save({ userId: 'user2', sideAText: 'card 2 side A text', sideBText: 'card 2 side B text' });
+    const practice = await service.newPracticeSession('user1');
+    expect(practice.items.length).to.equal(2);
+    expect(practice.items[0].userId).to.equal('user1');
+    expect(practice.items[1].userId).to.equal('user1');
+    expect(practice.items[0].sideAText).to.equal('card 1 side A text');
+    expect(practice.items[1].sideAText).to.equal('card 2 side A text');
+    // clean up cards
+    const deleteCards = async userId => {
+      const cards = await service.findByUserId(userId);
+      for (let card of cards.items) {
+        await service.delete(userId, card.id);
+      }
+    };
+    await deleteCards('user1');
+    await deleteCards('user2');
+  });
+
 });

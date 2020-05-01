@@ -105,9 +105,10 @@ class CardsRepository {
       this._dynamodb.query({
         TableName: this._tableName,
         IndexName: 'LabelAndLastTestTimeIndex',
-        KeyConditionExpression: 'edge = :edge',
+        KeyConditionExpression: 'edge = :edge and begins_with(LabelAndTestTimeIndex_userId_lastTestTime_id, :userId)',
         ExpressionAttributeValues: {
-          ':edge': { S: edge }
+          ':edge': { S: edge },
+          ':userId': { S: userId }
         },
         Limit: pageSize,
         ExclusiveStartKey: next,
