@@ -334,6 +334,33 @@ describe('CardsService', () => {
     ]);
   });
 
+  it.only('newPracticeSession - 1 frequency-often and 1 frequency-sometimes and 1 frequency-rarely', async () => {
+    // set up
+    await Promise.all([
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['frequency-often'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue2', labels: ['frequency-sometimes'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue3', labels: ['frequency-rarely'] }),
+      service.save({ userId: 'userIdValue1', id: 'cardIdValue4', labels: ['frequency-rarely'] }),
+    ]);
+    // execute function being tested
+    const cards = await service.newPracticeSession('userIdValue1', { pageSize: 3 });
+    // validate
+    expect(cards.items.length).to.equal(3);
+    expect(cards.items[0].id).to.equal('cardIdValue1');
+    expect(cards.items[0].labels).to.eql([ 'frequency-often', 'practice' ]);
+    expect(cards.items[1].id).to.equal('cardIdValue2');
+    expect(cards.items[1].labels).to.eql([ 'frequency-sometimes', 'practice' ]);
+    expect(cards.items[2].id).to.equal('cardIdValue3');
+    expect(cards.items[2].labels).to.eql([ 'frequency-rarely', 'practice' ]);
+    // clean up
+    await Promise.all([
+      service.delete('userIdValue1', 'cardIdValue1'),
+      service.delete('userIdValue1', 'cardIdValue2'),
+      service.delete('userIdValue1', 'cardIdValue3'),
+      service.delete('userIdValue1', 'cardIdValue4')
+    ]);
+  });
+
   it('detachLabel', async () => {
     // set up
     await Promise.all([

@@ -130,7 +130,8 @@ class CardsService {
     await this.deleteLabel(userId, 'practice');
     const often = await this._repository.findByLabelOrderByLastTestTime(userId, 'frequency-often', { pageSize });
     const sometimes = await this._repository.findByLabelOrderByLastTestTime(userId, 'frequency-sometimes', { pageSize });
-    const practiceSession = [ ...often.Items, ...sometimes.Items ].slice(0, pageSize);
+    const rarely = await this._repository.findByLabelOrderByLastTestTime(userId, 'frequency-rarely', { pageSize });
+    const practiceSession = [ ...often.Items, ...sometimes.Items, ...rarely.Items ].slice(0, pageSize);
     const keys = practiceSession.map(card =>  ({
       vertex: card.vertex,
       edge: { S: 'label:practice' },
