@@ -14,7 +14,7 @@ describe('CardsService', () => {
   const sandbox = sinon.createSandbox();
 
   before(async function() {
-    this.timeout(5000);
+    this.timeout(10000);
     const dynamodb = facade.start();
     repository = new Repository({ dynamodb, tableName });
     await facade.createTable('cardsTable', tableName);
@@ -79,7 +79,11 @@ describe('CardsService', () => {
     expect(card.labels).to.eql([ 'label2', 'label3' ]);
   });
 
-  it('save - ignore labels that are empty string');
+  it('save - ignore labels that are empty string', async () => {
+    const card = await service.save({ userId: 'user1', labels: [''] });
+    expect(card.labels).to.not.include('');
+    await service.delete('user1', card.id);
+  });
 
   it('save - new cards add frequency-often label', async () => {
     const card = await service.save({ userId: 'user1' });
@@ -87,7 +91,11 @@ describe('CardsService', () => {
     await service.delete('user1', card.id);
   });
 
-  it('save - new cards with frequency-often included as part of request');
+  it('save - new cards with frequency-often included as part of request', async () => {
+    const card = await service.save({ userId: 'user1', labels: ['frequency-often'] });
+    expect(card.labels).to.eql(['frequency-often']);
+    await service.delete('user1', card.id);
+  });
 
   it('delete - deletes vertex and all edges', async () => {
     const card = await service.save({ userId: 'userIdValue', id: 'cardIdValue', labels: ['labelValue1', 'labelValue2'] });
@@ -372,8 +380,6 @@ describe('CardsService', () => {
       service.delete('userIdValue1', 'cardIdValue3')
     ]);
   });
-
-  it('deleteLabel - pagination');
 
   it('deleteLabel - no cards with given label', async () => {
     await service.save({ userId: 'userIdValue1', id: 'cardIdValue1', labels: ['labelValue1', 'labelValue2'] });

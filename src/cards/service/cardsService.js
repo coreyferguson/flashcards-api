@@ -149,7 +149,7 @@ class CardsService {
       this._logger.info('CardsService.save:create', { cardId });
       model.id = cardId;
       model.labels = model.labels || [];
-      model.labels.push('frequency-often');
+      if (!model.labels.includes('frequency-often')) model.labels.push('frequency-often');
       model.lastTestTime =  model.lastTestTime || new Date().toISOString();
     }
     let entity = this._findByCardIdModelAssembler.toEntity(model);
@@ -157,6 +157,7 @@ class CardsService {
     let card = await this.findOne(model.userId, model.id);
     if (!this._arraysAreEqual(card.labels, model.labels)) {
       model.labels = model.labels || [];
+      model.labels = model.labels.filter(label => label !== '');
       await this.deleteLabelsOnCard(model.userId, model.id);
       const keys = model.labels.map(label => ({
         vertex: { S: `card:${model.userId}|${model.id}` },
