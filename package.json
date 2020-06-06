@@ -23,7 +23,7 @@
     "sinon-chai": "^3.3.0"
   },
   "dependencies": {
-    "apollo-server-lambda": "^2.6.2",
+    "apollo-server-lambda": "^2.14.2",
     "graphql": "^14.3.1",
     "logger-for-kibana": "^1.0.2",
     "moment": "^2.24.0",
